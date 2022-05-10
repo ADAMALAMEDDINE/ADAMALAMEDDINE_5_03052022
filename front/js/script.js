@@ -3,6 +3,7 @@
     const $items = document.querySelector("#items");
     
     function displayProduct(kanap) {
+        console.log(kanap);
         $items.innerHTML +=
             `<a href="./product.html?id=${kanap._id}">
                 <article>
