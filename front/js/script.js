@@ -1,9 +1,8 @@
 (function () {
     "use strict" //permet de générer les erreurs qui n'étaient pas forcément relevées 
     const $items = document.querySelector("#items");
-    
+
     function displayProduct(kanap) {
-        console.log(kanap);
         $items.innerHTML +=
             `<a href="./product.html?id=${kanap._id}">
                 <article>
@@ -20,18 +19,9 @@
         }
     }
 
-    function fetchProducts() {
-        fetch("http://localhost:3000/api/products")
-            .then(response => {
-                return response.json();
-            })
-            .then(kanaps => {
-                console.log(kanaps);
-                displayProducts(kanaps)
-            })
-            .catch((error) => {
-                console.log(error);
-            });
+    async function fetchProducts() {
+        const kanaps = await fetchKanaps();
+        displayProducts(kanaps)
     }
     fetchProducts()
 })()

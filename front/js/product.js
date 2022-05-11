@@ -10,33 +10,24 @@ let kanap = "";
 console.log(productId);
 
 
+async function initKanapInfo() {
+    kanap = await fetchKanap(productId)
 
-fetch("http://localhost:3000/api/products/" + productId)
-    .then(response => {
-        return response.json();
-    })
-    .then(kanap_result => {
-        kanap = kanap_result;
-        console.log(kanap);
-        document.querySelector("#title").innerHTML = kanap.name;
-        document.querySelector(".item__img").innerHTML = `<img src=${kanap.imageUrl} alt=${kanap.altText}>`;
-        document.querySelector("#price").innerHTML = kanap.price;
-        document.querySelector("#description").innerHTML = kanap.description;
+    document.querySelector("#title").innerHTML = kanap.name;
+    document.querySelector(".item__img").innerHTML = `<img src=${kanap.imageUrl} alt=${kanap.altText}>`;
+    document.querySelector("#price").innerHTML = kanap.price;
+    document.querySelector("#description").innerHTML = kanap.description;
 
-        let colorSelect = document.querySelector("#colors");
+    let colorSelect = document.querySelector("#colors");
 
-        for (let color of kanap.colors) {
-            console.table(color);
-            let colorOption = document.createElement("option");
-            colorSelect.appendChild(colorOption);
-            colorOption.value = color;
-            colorOption.innerHTML = color;
-        }
-    })
+    for (let color of kanap.colors) {
+        let colorOption = document.createElement("option");
+        colorSelect.appendChild(colorOption);
+        colorOption.value = color;
+        colorOption.innerHTML = color;
+    }
+}
 
-    .catch((error) => {
-        console.log(error);
-    });
 
 function addToCart() {
 
@@ -47,11 +38,7 @@ function addToCart() {
             productId,
             colorProduct: choixColor,
             quantityProduct: Number(choixQantity),
-            nameProduct: kanap.name,
-            priceProduct: kanap.price,
-            descriptionProduct: kanap.description,
-            imgProduct: kanap.imageUrl,
-            altImgProduct: kanap.altText
+
         };
         const popupConfirmation = () => {
             if (window.confirm(`Votre commande de ${choixQantity} ${kanap.name} ${choixColor} est ajoutée au panier
@@ -69,10 +56,10 @@ function addToCart() {
             const existingProductIndex = basketKanaps.findIndex(
                 (el) => el.productId === productId && el.colorProduct === choixColor);
 
-            if (existingProductIndex >-1) {
+            if (existingProductIndex > -1) {
                 let newQuantity =
                     parseInt(optionProduct.quantityProduct) + parseInt(basketKanaps[existingProductIndex].quantityProduct);
-                    basketKanaps[existingProductIndex].quantityProduct = newQuantity;
+                basketKanaps[existingProductIndex].quantityProduct = newQuantity;
                 localStorage.setItem("produitKanapAdamOpcrp5", JSON.stringify(basketKanaps));
                 popupConfirmation();
             } else {
@@ -96,10 +83,10 @@ function addToCart() {
 
 }
 
-addToCartBtn.addEventListener("click",() => {
+addToCartBtn.addEventListener("click", () => {
     addToCart();
 });
-
+initKanapInfo();
 
 
 

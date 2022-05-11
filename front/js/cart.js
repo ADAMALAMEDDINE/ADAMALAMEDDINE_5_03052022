@@ -7,34 +7,38 @@ let nameRegex = /^[a-zA-Z]{2,}$/;
 let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
 let adressRegex = /^[a-zA-Z0-9\s,'-]*$/;
 
+const cartItemsCtnr = document.querySelector("#cart__items");
+
 if (stordData) {
     productsFromBasket = JSON.parse(stordData);
 }
 
-
 let kanap = "";
-function displayEmptyBasket(){
-    const titleCart = document.querySelector("h1");
-        const sectionCart = document.querySelector(".cart");
 
-        titleCart.innerHTML = "Votre panier est vide !";
-        sectionCart.style.display = "none";
-        
-        //let productTotalQuantity = document.getElementById('totalQuantity');
-        //productTotalQuantity.innerHTML = 0;
-    
-        //let productTotalPrice = document.getElementById('totalPrice');
-        //productTotalPrice.innerHTML = 0;
+
+function displayEmptyBasket() {
+    const titleCart = document.querySelector("h1");
+    const sectionCart = document.querySelector(".cart");
+
+    titleCart.innerHTML = "Votre panier est vide !";
+    sectionCart.style.display = "none";
+
+    //let productTotalQuantity = document.getElementById('totalQuantity');
+    //productTotalQuantity.innerHTML = 0;
+
+    //let productTotalPrice = document.getElementById('totalPrice');
+    //productTotalPrice.innerHTML = 0;
 
 }
 function displayBasketCreation() {
+    cartItemsCtnr.innerHTML = "";
+
     if (!productsFromBasket) {
 
         displayEmptyBasket()
         return;
     }
-    const cartItemsCtnr = document.querySelector("#cart__items");
-    cartItemsCtnr.innerHTML = "";
+
 
     for (let i = 0; i < productsFromBasket.length; i++) {
 
@@ -113,28 +117,27 @@ function displayBasketCreation() {
             localStorage.setItem('produitKanapAdamOpcrp5', JSON.stringify(productsFromBasket));
 
             alert('Votre article a bien été supprimé.');
-            getTotals();
             if (productsFromBasket.length === 0) {
                 localStorage.removeItem("produitKanapAdamOpcrp5");
             }
-            
+
+            getTotals();
+            displayBasketCreation()
         });
     }
-    displayDeleteBtn(cartItemsCtnr)
 }
-
 function displayDeleteBtn(cartItemsCtnr) {
     let btnDeleteAll = document.createElement("button");
-            btnDeleteAll.id = "emptyCart";
-            let t = document.createTextNode("Vider le panier");
-            btnDeleteAll.appendChild(t);
-            document.querySelector(".cart__price").appendChild(btnDeleteAll);
+    btnDeleteAll.id = "emptyCart";
+    let t = document.createTextNode("Vider le panier");
+    btnDeleteAll.appendChild(t);
+    document.querySelector(".cart__price").appendChild(btnDeleteAll);
 
-            btnDeleteAll.addEventListener("click", ()=>{
-                localStorage.removeItem("produitKanapAdamOpcrp5");
-                cartItemsCtnr.innerHTML = "";               
-                displayEmptyBasket()
-            })
+    btnDeleteAll.addEventListener("click", () => {
+        localStorage.removeItem("produitKanapAdamOpcrp5");
+        cartItemsCtnr.innerHTML = "";
+        displayEmptyBasket()
+    })
 }
 function getTotals() {
     let totalQtt = 0,
@@ -156,9 +159,6 @@ function getTotals() {
     let productTotalPrice = document.getElementById('totalPrice');
     productTotalPrice.innerHTML = totalPrice;
 }
-getTotals();
-
-
 function modifyQtt(quantityInput, colorProduct, productId) {
 
     quantityInput.addEventListener("change", () => {
@@ -172,8 +172,6 @@ function modifyQtt(quantityInput, colorProduct, productId) {
         getTotals();
     })
 }
-
-
 function getForm() {
     let firstName = document.getElementById('firstName');
     firstName.addEventListener('input', function () {
@@ -225,7 +223,6 @@ function getForm() {
         }
     });
 }
-
 function setUpOrderForm() {
     const orderButton = document.getElementById('order');
 
@@ -264,19 +261,8 @@ function setUpOrderForm() {
                 },
                 products: productIds,
             };
-            console.log(buyOrder);
 
-            const postOptions = {
-                method: 'POST',
-                body: JSON.stringify(buyOrder),
-                headers: {
-                    'Content-type': 'application/json',
-                },
-            };
-            fetch('http://localhost:3000/api/products/order', postOptions)
-                .then((res) => {
-                    return res.json();
-                })
+            fetchKanapsOrder(buyOrder)
                 .then((data) => {
                     const orderId = data.orderId;
                     window.location.href = 'confirmation.html?orderId=' + orderId;
@@ -290,7 +276,22 @@ function setUpOrderForm() {
     })
 }
 
-getForm()
-setUpOrderForm();
-displayBasketCreation();
+async function initCart() {
+    if (productsFromBasket) {
+        const kanaps = await fetchKanaps();
+        productsFromBasket = productsFromBasket.map((item) => {
+            const index = kanaps.findIndex((elem) => elem._id == item.productId);
+            const elem = kanaps[index];
+            return { ...item, imgProduct: elem.imageUrl, nameProduct: elem.name, priceProduct: elem.price }
+        });
+
+    }
+    getTotals();
+    getForm();
+    setUpOrderForm();
+    displayBasketCreation();
+    displayDeleteBtn(cartItemsCtnr);
+}
+initCart();
+
 
